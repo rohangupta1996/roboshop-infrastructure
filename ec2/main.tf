@@ -15,7 +15,7 @@ resource "aws_instance" "ec2" {
   }
 }
 
-resource "null resource" "provisioner" {
+resource "null_resource" "provisioner" {
     provisioner "remote-exec" {
 
     connection {

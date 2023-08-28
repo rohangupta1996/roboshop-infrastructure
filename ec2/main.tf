@@ -58,7 +58,7 @@ resource "aws_security_group" "sg" {
   }
 }
 resource "aws_route53_record" "ec2" {
-  zone_id = Z07976502M6F7LN0JRVET
+  zone_id = "Z07976502M6F7LN0JRVET"
   name    = "$(var.component)-dev.rohandevops.online"
   type    = "A"
   ttl     = 300

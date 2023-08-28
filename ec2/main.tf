@@ -62,7 +62,7 @@ resource "aws_route53_record" "ec2" {
   name    = "$(var.component)-dev.rohandevops.online"
   type    = "A"
   ttl     = 300
-  records = aws_instance.ec2.private_ip
+  records = [aws_instance.ec2.private_ip]
 }
 
 

@@ -19,14 +19,16 @@ resource "null_resource" "provisioner" {
     provisioner "remote-exec" {
 
     connection {
-      host = aws_instance.ec2.public_ip
+      host     = aws_instance.ec2.public_ip
       user     = "centos"
       password = "DevOps321"
 
     }
 
     inline = [
-      "ansible-pull -i localhost, -u https://github.com/rohangupta1996/roboshop-ansible.git roboshop.yml -e role_name= ${var.component}"
+      "git clone https://github.com/rohangupta1996/roboshop-infrastructure.git",
+      "cd robo-shell",
+      "sudo bash ${var.component}.sh"
     ]
   }
 
@@ -59,9 +61,9 @@ resource "aws_security_group" "sg" {
 }
 resource "aws_route53_record" "ec2" {
   zone_id = "Z07976502M6F7LN0JRVET"
-  name    = "$(var.component)-dev.rohandevops.online"
+  name    = "${var.component}-dev.rohandevops.online"
   type    = "A"
-  ttl     = 300
+  ttl     = 30
   records = [aws_instance.ec2.private_ip]
 }
 

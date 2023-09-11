@@ -1,4 +1,7 @@
 parameters = [
-  { name= "test1", value="Hello Parametrer", type= "String"},
-  { name= "dev.frontend.CATALOGUE_URL", value="http://catalogue-dev.rohandevops.online:8080/", type= "String"}
+  { name= "dev.frontend.catalogue_URL", value="http://localhost:8080/", type= "String"},
+  { name= "dev.frontend.user_URL", value="http://localhost:8080/", type= "String"},
+  { name= "dev.frontend.cart_URL", value="http://localhost:8080/", type= "String"},
+  { name= "dev.frontend.shipping_URL", value="http://localhost:8080/", type= "String"},
+  { name= "dev.frontend.payment_URL", value="http://localhost:8080/", type= "String"}
 ]

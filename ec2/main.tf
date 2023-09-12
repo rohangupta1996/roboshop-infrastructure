@@ -2,11 +2,12 @@ resource "aws_instance" "ec2" {
   ami                    = data.aws_ami.ami.image_id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.sg.id]
-  iam_instance_profile = "${var.env}.${var.component}-role"
+  iam_instance_profile = "${var.env}-${var.component}-role"
   tags                   = {
     Name = var.component
   }
 }
+
 
 resource "null_resource" "provisioner" {
   provisioner "remote-exec" {
@@ -27,6 +28,7 @@ resource "null_resource" "provisioner" {
     ]
   }
 }
+
 
 #security group
 resource "aws_security_group" "sg" {
@@ -113,7 +115,20 @@ resource "aws_iam_instance_profile" "profile" {
   role = aws_iam_role.role.name
 }
 
+
 resource "aws_iam_role_policy_attachment" "policy-attach" {
   role       = aws_iam_role.role.name
   policy_arn = aws_iam_policy.ssm-policy.arn
 }
+
+
+
+
+
+
+
+
+
+
+
+

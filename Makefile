@@ -1,10 +1,6 @@
 git:
-    git pull
-
-dev-apply: git
-    terraform init -backend-config=env-dev/state.tfvars
-    terraform apply -auto-approve -var-file=env-dev/main.tfvars
-
+	git pull
+dev-apply:
+	echo dev-apply
 dev-destroy:
-    terraform init -backend-config=env-dev/state.tfvars
-    terraform destroy -auto-approve -var-file=env-dev/main.tfvars
+	echo dev-destroy

@@ -39,5 +39,5 @@ instances = {
 #    name = "payment"
 #    type = "t3.micro"
 #  }
-#}
+}
 env = "dev"

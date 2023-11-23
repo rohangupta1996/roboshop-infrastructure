@@ -1,3 +1,6 @@
-variable "instances" {}
 variable "env" {}
+variable "tags" {}
+
+variable "vpc" {}
+
 

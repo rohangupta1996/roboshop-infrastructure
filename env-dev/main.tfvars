@@ -4,7 +4,7 @@ vpc = {
   main = {
     vpc_cidr = "10.0.0.0/16"
 
-    public_subnets = {
+    public_subnet = {
       public-az1 = {
         name = "public-az1"
         cidr_block = [ "10.0.0.0/24" ]

@@ -8,3 +8,7 @@ module "vpc" {
   public_subnet = each.value["public_subnet"]
   private_subnet = each.value["private_subnet"]
 }
+
+output "vpc" {
+  value = module.vpc
+}

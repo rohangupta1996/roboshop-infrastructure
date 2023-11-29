@@ -5,6 +5,7 @@ variable "default_route_table" {}
 variable "vpc" {}
 variable "docdb" {}
 variable "rds" {}
+variable "elasticache" {}
 
 
 

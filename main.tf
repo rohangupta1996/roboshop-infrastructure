@@ -28,6 +28,7 @@ module "docdb" {
   instance_class               = each.value["instance_class"]
 
 }
+
 module "rds" {
   source = "git::https://github.com/rohangupta1996/tf-module-rds.git"
   env    = var.env
@@ -45,6 +46,6 @@ module "rds" {
 
 }
 
-#output "vpc" {
-#  value = local.db_subnet_ids
-#}
+output "vpc" {
+  value = local.db_subnet_ids
+}

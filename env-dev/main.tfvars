@@ -1,4 +1,6 @@
 env = "dev"
+# bastion meain workstaion ka pvt ip dena h , ( /32 ) represent single ip
+bastion_cidr = [ "172.31.20.215/32" ]
 
 vpc = {
   main = {
@@ -54,17 +56,17 @@ vpc = {
   }
 }
 
-#docdb = {
-#  main = {
-#    engine = "docdb"
-#    engine_version = "4.0.0"
-#    backup_retention_period = 2
-#    preferred_backup_window = "07:00-09:00"
-#    skip_final_snapshot = true
-#    no_of_instances = 1
-#    instance_class = "db.t3.medium"
-#  }
-#}
+docdb = {
+  main = {
+    engine = "docdb"
+    engine_version = "4.0.0"
+    backup_retention_period = 2
+    preferred_backup_window = "07:00-09:00"
+    skip_final_snapshot = true
+    no_of_instances = 1
+    instance_class = "db.t3.medium"
+  }
+}
 
 rds = {
   main = {
@@ -77,17 +79,98 @@ rds = {
   }
 }
 
-#elasticache = {
-#  main ={
-#    engine = "redis"
-#    engine_version = "6.x"
-#    num_cache_nodes = 1
-#    node_type = "cache.t3.micro"
-#  }
-#}
-#
-#rabbitmq = {
-#  main = {
-#    instance_type = "t3.micro"
-#  }
-#}
+elasticache = {
+  main ={
+    engine = "redis"
+    engine_version = "6.x"
+    num_cache_nodes = 1
+    node_type = "cache.t3.micro"
+  }
+}
+
+rabbitmq = {
+  main = {
+    instance_type = "t3.micro"
+  }
+}
+
+alb = {
+  public = {
+    subnet_name = "public"
+    name = "public"
+    internal = false
+    load_balancer_type = "application"
+    allow_cidr = ["0.0.0.0/0"]
+  }
+
+  private = {
+    subnet_name = "app"
+    name = "private"
+    internal = true
+    load_balancer_type = "application"
+    allow_cidr = ["10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
+  }
+}
+
+apps = {
+  catalogue = {
+    component        = "catalogue"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "app"
+    port             = 8080
+    allow_app_to     = "app"
+  }
+  cart = {
+    component        = "cart"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "app"
+    port             = 8080
+    allow_app_to     = "app"
+  }
+  user = {
+    component        = "user"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "app"
+    port             = 8080
+    allow_app_to     = "app"
+  }
+  shipping = {
+    component        = "shipping"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "app"
+    port             = 8080
+    allow_app_to     = "app"
+  }
+  payment = {
+    component        = "payment"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "app"
+    port             = 8080
+    allow_app_to     = "app"
+  }
+  frontend = {
+    component        = "frontend"
+    instance_type    = "t3.micro"
+    desired_capacity = 1
+    max_size         = 4
+    min_size         = 1
+    subnet_name      = "web"
+    port             = 80
+    allow_app_to     = "public"
+  }
+}

@@ -11,68 +11,78 @@ module "vpc" {
   private_subnet = each.value["private_subnet"]
 }
 
-#module "docdb" {
-#  source = "git::https://github.com/rohangupta1996/tf-module-docdb.git"
-#  env    = var.env
-#  tags   = var.tags
-#
-#  subnet_ids                   = local.db_subnet_ids
-#
-#  for_each                     = var.docdb
-#  engine                       = each.value["engine"]
-#  engine_version               = each.value["engine_version"]
-#  backup_retention_period      = each.value["backup_retention_period"]
-#  preferred_backup_window      = each.value["preferred_backup_window"]
-#  skip_final_snapshot          = each.value["skip_final_snapshot"]
-#  no_of_instances              = each.value["no_of_instances"]
-#  instance_class               = each.value["instance_class"]
-#
-#}
+module "docdb" {
+  source = "git::https://github.com/rohangupta1996/tf-module-docdb.git"
+  env    = var.env
+  tags   = var.tags
 
-#module "rds" {
-#  source = "git::https://github.com/rohangupta1996/tf-module-rds.git"
-#  env    = var.env
-#  tags   = var.tags
-#
-#  subnet_ids                   = local.db_subnet_ids
-#
-#  for_each                     = var.rds
-#  engine                       = each.value["engine"]
-#  backup_retention_period      = each.value["backup_retention_period"]
-#  preferred_backup_window      = each.value["preferred_backup_window"]
-#  engine_version               = each.value["engine_version"]
-#  instance_class               = each.value["instance_class"]
-#  no_of_instances              = each.value["no_of_instances"]
-#
-#}
+  subnet_ids                   = local.db_subnet_ids
+  vpc_id                       = module.vpc["main"].vpc_id
+
+  for_each                     = var.docdb
+  engine                       = each.value["engine"]
+  engine_version               = each.value["engine_version"]
+  backup_retention_period      = each.value["backup_retention_period"]
+  preferred_backup_window      = each.value["preferred_backup_window"]
+  skip_final_snapshot          = each.value["skip_final_snapshot"]
+  no_of_instances              = each.value["no_of_instances"]
+  instance_class               = each.value["instance_class"]
+  allow_subnets                = lookup(local.subnet_cidr, each.value["allow_subnets"], null)
+
+}
+
+module "rds" {
+  source = "git::https://github.com/rohangupta1996/tf-module-rds.git"
+  env    = var.env
+  tags   = var.tags
+
+  subnet_ids                   = local.db_subnet_ids
+  vpc_id                       = module.vpc["main"].vpc_id
+
+  for_each                     = var.rds
+  engine                       = each.value["engine"]
+  backup_retention_period      = each.value["backup_retention_period"]
+  preferred_backup_window      = each.value["preferred_backup_window"]
+  engine_version               = each.value["engine_version"]
+  instance_class               = each.value["instance_class"]
+  no_of_instances              = each.value["no_of_instances"]
+  allow_subnets                = lookup(local.subnet_cidr, each.value["allow_subnets"], null)
+
+}
 
 
-#module "elasticache" {
-#  source = "git::https://github.com/rohangupta1996/tf-module-elasticache.git"
-#  env    = var.env
-#  tags   = var.tags
-#
-#  subnet_ids                   = local.db_subnet_ids
-#
-#  for_each                     = var.elasticache
-#  engine                       = each.value["engine"]
-#  engine_version               = each.value["engine_version"]
-#  num_cache_nodes              = each.value["num_cache_nodes"]
-#  node_type                    = each.value["node_type"]
-#
-#
-#}
+module "elasticache" {
+  source = "git::https://github.com/rohangupta1996/tf-module-elasticache.git"
+  env    = var.env
+  tags   = var.tags
 
-#module "rabbitmq" {
-#  source = "git::https://github.com/rohangupta1996/tf-module-rabbitmq.git"
-#  env    = var.env
-#  tags   = var.tags
-#
-#  subnet_ids                   = local.db_subnet_ids
-#
-#  for_each                     = var.rabbitmq
-#  instance_type                = each.value["instance_type"]
-#}
+  subnet_ids                   = local.db_subnet_ids
+  vpc_id                       = module.vpc["main"].vpc_id
+
+  for_each                     = var.elasticache
+  engine                       = each.value["engine"]
+  engine_version               = each.value["engine_version"]
+  num_cache_nodes              = each.value["num_cache_nodes"]
+  node_type                    = each.value["node_type"]
+  allow_subnets                = lookup(local.subnet_cidr, each.value["allow_subnets"], null)
+
+
+}
+
+module "rabbitmq" {
+  source = "git::https://github.com/rohangupta1996/tf-module-rabbitmq.git"
+  env    = var.env
+  tags   = var.tags
+  bastion_cidr = var.bastion_cidr
+  dns_domain = var.dns_domain
+
+  subnet_ids                   = local.db_subnet_ids
+  vpc_id                       = module.vpc["main"].vpc_id
+
+  for_each                     = var.rabbitmq
+  instance_type                = each.value["instance_type"]
+  allow_subnets                = lookup(local.subnet_cidr, each.value["allow_subnets"], null)
+}
 
 module "alb" {
   source = "git::https://github.com/rohangupta1996/tf-module-alb.git"
@@ -91,10 +101,12 @@ module "alb" {
 }
 
 module "app" {
+  depends_on = [module.docdb, module.rds, module.elasticache, module.alb, module.rabbitmq]
   source = "git::https://github.com/rohangupta1996/tf-module-app.git"
   env    = var.env
   tags   = var.tags
   bastion_cidr = var.bastion_cidr
+  monitoring_nodes = var.monitoring_nodes
   dns_domain = var.dns_domain
 
   vpc_id = module.vpc["main"].vpc_id
@@ -108,6 +120,7 @@ module "app" {
   port             = each.value["port"]
   subnets          = lookup(local.subnet_ids, each.value["subnet_name"], null)
   listener_priority = each.value["listener_priority"]
+  parameters       = each.value["parameters"]
   allow_app_to     = lookup(local.subnet_cidr, each.value["allow_app_to"], null)
   alb_dns_name     = lookup(lookup(lookup(module.alb, each.value["alb"], null), "alb", null), "dns_name", null)
   listener_arn     = lookup(lookup(lookup(module.alb, each.value["alb"], null), "listener", null), "arn", null)
@@ -116,4 +129,47 @@ module "app" {
 #This below output is to read the data of particular module
 output "alb" {
   value = module.alb
+}
+### Load Runner
+data "aws_ami" "ami" {
+  most_recent = true
+  name_regex = "devops-practice-with-ansible"
+  owners = ["self"]
+}
+
+resource "aws_spot_instance_request" "load-runner" {
+  ami           = data.aws_ami.ami.id
+  instance_type = "t3.medium"
+  wait_for_fulfillment = true
+  vpc_security_group_ids = ["sg-0c2a9ceb9bd234b68"]
+
+  tags = merge(
+    var.tags,
+    { Name = "load-runner" }
+  )
+}
+
+resource "aws_ec2_tag" "name-tag" {
+  key         = "Name"
+  resource_id = aws_spot_instance_request.load-runner.spot_instance_id
+  value       = "load-runner"
+}
+
+resource "null_resource" "load-gen" {
+  triggers = {
+    abc = aws_spot_instance_request.load-runner.public_ip
+  }
+  provisioner "remote-exec" {
+    connection {
+      host = aws_spot_instance_request.load-runner.public_ip
+      user = "root"
+      password = data.aws_ssm_parameter.ssh_pass.value
+    }
+    inline = [
+     "curl -s -L https://get.docker.com | bash",
+      "systemctl enable docker",
+      "systemctl start docker",
+      "docker pull roboshop/rs-load"
+    ]
+  }
 }
